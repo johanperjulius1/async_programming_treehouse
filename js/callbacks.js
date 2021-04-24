@@ -4,26 +4,29 @@ const peopleList = document.getElementById("people");
 const btn = document.querySelector("button");
 
 // Make an AJAX request
-function getJSON(url) {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", url);
-    xhr.onload = () => {
-      if (xhr.status === 200) {
-        let data = JSON.parse(xhr.responseText);
-        resolve(data);
-      } else {
-        reject(Error(xhr.statusText));
-      }
-    };
-    xhr.onerror = () => reject(Error(" A network error occured"));
-    xhr.send();
-  });
-}
+
+
+// function getJSON(url) {
+//   return new Promise((resolve, reject) => {
+//     const xhr = new XMLHttpRequest();
+//     xhr.open("GET", url);
+//     xhr.onload = () => {
+//       if (xhr.status === 200) {
+//         let data = JSON.parse(xhr.responseText);
+//         resolve(data);
+//       } else {
+//         reject(Error(xhr.statusText));
+//       }
+//     };
+//     xhr.onerror = () => reject(Error(" A network error occured"));
+//     xhr.send();
+//   });
+// }
 
 function getProfiles(json) {
   const profiles = json.people.map((person) => {
-    return getJSON(wikiUrl + person.name);
+    return fetch(wikiUrl + person.name)
+            .then(response => response.json())
   });
   return Promise.all(profiles);
 }
@@ -55,7 +58,8 @@ function generateHTML(data) {
 btn.addEventListener("click", (event) => {
   event.target.textContent = "Loading...";
 
-  getJSON(astrosUrl)
+  fetch(astrosUrl)
+    .then(response => response.json())
     .then(getProfiles)
     .then(generateHTML)
     .catch(err => {
@@ -63,5 +67,4 @@ btn.addEventListener("click", (event) => {
       console.log(err)
     })
     .finally(() => event.target.remove());
-  event.target.remove();
 });
